@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App - Barnaamijka Su'aalaha</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- Card-ka Quiz-ka -->
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 relative overflow-hidden">
+        
+        <!-- Header / Progress Bar -->
+        <div id="quiz-header">
+            <div class="flex justify-between items-center mb-3">
+                <span id="question-tracker" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                    Su'aasha 1 ee 10
+                </span>
+                <span id="score-live" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">
+                    Puntos: 0
+                </span>
+            </div>
+            <!-- Progress bar container -->
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-6">
+                <div id="progress-bar" class="bg-indigo-600 h-full w-1/10 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Qeybta Su'aasha iyo Jawaabaha -->
+        <div id="quiz-body">
+            <!-- Su'aasha -->
+            <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 mb-6 leading-snug">
+                Su'aashu halkan ayay soo bixi doontaa...
+            </h2>
+
+            <!-- Liiska Jawaabaha -->
+            <div id="answers-container" class="space-y-3 mb-6">
+                <!-- Jawaabaha ayaa JavaScript looga soo shubayaa halkan -->
+            </div>
+
+            <!-- Batan-ka Su'aasha Xigta -->
+            <button id="next-btn" onclick="nextQuestion()" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
+                <span>Tallaabada Xigta</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Qeybta Natiijada Ugu Dambaysa (Hidden By Default) -->
+        <div id="result-screen" class="hidden text-center py-6 space-y-5">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Hambalyo! Waad Dhameysay</h2>
+                <p class="text-sm text-slate-500 mt-1">Halkan waa natiijadii aad ka keentay quiz-ka:</p>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-around items-center">
+                <div>
+                    <span class="block text-2xl font-black text-indigo-600" id="final-score">0/10</span>
+                    <span class="text-xs text-slate-400 font-medium">Jawaabaha Saxda ah</span>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div>
+                    <span class="block text-2xl font-black text-emerald-500" id="final-percentage">0%</span>
+                    <span class="text-xs text-slate-400 font-medium">Boqolkiiba</span>
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg">
+                <i class="fa-solid fa-rotate-right text-sm"></i>
+                <span>Dib u bilaaw Quiz-ka</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // 10-ka Su'aalood ee Quiz-ka
+        const questions = [
+            {
+                question: "1. Waa maxay caasimada dalka Soomaaliya?",
+                answers: [
+                    { text: "Hargeysa", correct: false },
+                    { text: "Muqdisho", correct: true },
+                    { text: "Kismaayo", correct: false },
+                    { text: "Garowe", correct: false }
+                ]
+            },
+            {
+                question: "2. Waa maxay luqada ugu weyn ee loo isticmaalo web development-ka dhanka client-side?",
+                answers: [
+                    { text: "Python", correct: false },
+                    { text: "Java", correct: false },
+                    { text: "JavaScript", correct: true },
+                    { text: "C++", correct: false }
+                ]
+            },
+            {
+                question: "3. Waa maxay gaabinta HTML?",
+                answers: [
+                    { text: "HyperText Markup Language", correct: true },
+                    { text: "HighTech Modern Language", correct: false },
+                    { text: "HyperTransfer Machine Language", correct: false },
+                    { text: "Home Tool Markup Language", correct: false }
+                ]
+            },
+            {
+                question: "4. Badda ee ku taal Bariga Soomaaliya waa maxay?",
+                answers: [
+                    { text: "Badda Cas", correct: false },
+                    { text: "Baxar Cadiim", correct: false },
+                    { text: "Badweynta Hindiya", correct: true },
+                    { text: "Badda Madow", correct: false }
+                ]
+            },
+            {
+                question: "5. CSS waxaa loo isticmaalaa maxay web-ka dhexdiisa?",
+                answers: [
+                    { text: "In lagu kaydiyo Data-da", correct: false },
+                    { text: "In lagu bilcleeyo laguna qaabeeyo (Style)", correct: true },
+                    { text: "In lagu dhiso Server-ka", correct: false },
+                    { text: "In lagu sameeyo kalkuleetar", correct: false }
+                ]
+            },
+            {
+                question: "6. Waa maxay web browser-ka ugu isticmaalka badan dunida?",
+                answers: [
+                    { text: "Mozilla Firefox", correct: false },
+                    { text: "Safari", correct: false },
+                    { text: "Google Chrome", correct: true },
+                    { text: "Microsoft Edge", correct: false }
+                ]
+            },
+            {
+                question: "7. Waa maxay wabiga ugu dheer dalka Soomaaliya?",
+                answers: [
+                    { text: "Wabiga Shabelle", correct: true },
+                    { text: "Wabiga Juba", correct: false },
+                    { text: "Wabiga Niil", correct: false },
+                    { text: "Wabiga Tana", correct: false }
+                ]
+            },
+            {
+                question: "8. Waa maxay gaabinta CSS?",
+                answers: [
+                    { text: "Creative Style Sheets", correct: false },
+                    { text: "Cascading Style Sheets", correct: true },
+                    { text: "Computer Style System", correct: false },
+                    { text: "Colorful Style Sheets", correct: false }
+                ]
+            },
+            {
+                question: "9. Waa maxay meeraha ugu dhow Qorraxda?",
+                answers: [
+                    { text: "Dusaa (Mercury)", correct: true },
+                    { text: "Zuhra (Venus)", correct: false },
+                    { text: "Dheehan (Mars)", correct: false },
+                    { text: "Dhulka (Earth)", correct: false }
+                ]
+            },
+            {
+                question: "10. Waa maxay calaamadda loo isticmaalo ID-yada (IDs) CSS-ka dhexdiisa?",
+                answers: [
+                    { text: "Barta (.)", correct: false },
+                    { text: "Astaanta Hash (#)", correct: true },
+                    { text: "Astaanta At (@)", correct: false },
+                    { text: "Astaanta Dollar ($)", correct: false }
+                ]
+            }
+        ];
+
+        // Variables maamula Stat-ka
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionText = document.getElementById("question-text");
+        const answersContainer = document.getElementById("answers-container");
+        const nextBtn = document.getElementById("next-btn");
+        const questionTracker = document.getElementById("question-tracker");
+        const scoreLive = document.getElementById("score-live");
+        const progressBar = document.getElementById("progress-bar");
+
+        const quizHeader = document.getElementById("quiz-header");
+        const quizBody = document.getElementById("quiz-body");
+        const resultScreen = document.getElementById("result-screen");
+
+        // Bilaabida Quiz-ka
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizHeader.classList.remove("hidden");
+            quizBody.classList.remove("hidden");
+            resultScreen.classList.add("hidden");
+            showQuestion();
+        }
+
+        // Soo bandhigida Su'aasha Hadda
+        function showQuestion() {
+            resetState();
+            let currentQuestion = questions[currentQuestionIndex];
+            
+            // Cusbooneysii Text-ga iyo Progress Bar-ka
+            questionText.innerText = currentQuestion.question;
+            questionTracker.innerText = `Su'aasha ${currentQuestionIndex + 1} ee ${questions.length}`;
+            scoreLive.innerText = `Puntos: ${score}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+            // Soo saar Jawaabaha
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerText = answer.text;
+                button.className = "w-full text-left p-4 rounded-xl border-2 border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 font-medium text-slate-700 transition duration-150 flex justify-between items-center";
+                
+                if (answer.correct) {
+                    button.dataset.correct = "true";
+                }
+                
+                button.addEventListener("click", selectAnswer);
+                answersContainer.appendChild(button);
+            });
+        }
+
+        // Reset-gareynta
+        function resetState() {
+            nextBtn.disabled = true;
+            answersContainer.innerHTML = "";
+        }
+
+        // Marka la taabto Jawaab
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === "true";
+
+            if (isCorrect) {
+                selectedBtn.classList.remove("bg-slate-50", "border-slate-100", "hover:bg-slate-100");
+                selectedBtn.classList.add("bg-emerald-50", "border-emerald-500", "text-emerald-800", "font-bold");
+                selectedBtn.innerHTML += ' <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>';
+                score++;
+            } else {
+                selectedBtn.classList.remove("bg-slate-50", "border-slate-100", "hover:bg-slate-100");
+                selectedBtn.classList.add("bg-rose-50", "border-rose-500", "text-rose-800", "font-bold");
+                selectedBtn.innerHTML += ' <i class="fa-solid fa-circle-xmark text-rose-500 text-lg"></i>';
+            }
+
+            // Muuji Jawaabta Saxda ah hadii tii qaldanayd la doortay
+            Array.from(answersContainer.children).forEach(button => {
+                if (button.dataset.correct === "true" && !isCorrect) {
+                    button.classList.remove("bg-slate-50", "border-slate-100");
+                    button.classList.add("bg-emerald-50", "border-emerald-400", "text-emerald-800");
+                    button.innerHTML += ' <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>';
+                }
+                button.disabled = true; // Dhammaan batannada kale xidh
+            });
+
+            scoreLive.innerText = `Puntos: ${score}`;
+            nextBtn.disabled = false;
+        }
+
+        // Tallaabada Xigta
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Soo bandhigida Natiijada Ugu Dambaysa
+        function showResult() {
+            quizHeader.classList.add("hidden");
+            quizBody.classList.add("hidden");
+            resultScreen.classList.remove("hidden");
+
+            document.getElementById("final-score").innerText = `${score}/${questions.length}`;
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById("final-percentage").innerText = `${percentage}%`;
+        }
+
+        // Dib u bilaabid
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Bilaabida marka safxada la furo
+        startQuiz();
+    </script>
+</body>
+</html>

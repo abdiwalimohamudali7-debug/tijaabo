@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVC Plus Simple Input</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+   
+   
+   <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+   
+   
+   <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hormuud: {
+                            green: '#008751',
+                            teal: '#00A896',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script> 
+</head>
+<body class="bg-slate-900 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Container-ka Kaliya Input-ka ah -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-5">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-hormuud-green rounded-xl flex items-center justify-center text-white font-black font-mono">
+                    EVC
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-800">EVC Plus USSD</h1>
+                    <p class="text-xs text-emerald-600 font-medium">Hormuud Telecom</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-slate-400 uppercase font-semibold">Haraaga (Balance)</span>
+                <p id="info-balance-display" class="text-sm font-bold text-slate-800">$154.50</p>
+            </div>
+        </div>
+
+        <!-- USSD Code Input Form -->
+        <div class="space-y-3">
+            <label for="ussd-code-input" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Geli USSD Code (*711# ama *770#)
+            </label>
+            <div class="flex gap-2">
+                <input type="text" id="ussd-code-input" value="*770#" placeholder="Tusaale: *770#" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-lg text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-hormuud-green focus:border-transparent">
+                <button onclick="executeUSSD()" class="bg-hormuud-green hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-phone"></i> Dir
+                </button>
+            </div>
+        </div>
+
+        <!-- Shortcut Buttons -->
+        <div class="flex gap-2 pt-2">
+            <button onclick="quickType('*711#')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 py-2 rounded-xl text-xs font-bold transition">
+                *711# (Haraag)
+            </button>
+            <button onclick="quickType('*770#')" class="flex-1 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 py-2 rounded-xl text-xs font-bold transition">
+                *770# (U dir lacag)
+            </button>
+        </div>
+
+        <!-- Info Note -->
+        <div class="text-[11px] text-slate-400 text-center border-t pt-3">
+            PIN-ka default-ka ah waa <span class="font-bold text-slate-600">1234</span>
+        </div>
+    </div>
+
+    <!-- USSD POP-UP OVERLAY MODAL -->
+    <div id="ussd-overlay" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-xs bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="bg-slate-800 text-slate-100 px-4 py-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span class="text-xs font-semibold" id="ussd-header-title">USSD Message</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">Hormuud</span>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4 space-y-3">
+                <p id="ussd-prompt-text" class="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-line font-mono">
+                    Loading...
+                </p>
+                <div id="ussd-input-container" class="mt-2">
+                    <input type="text" id="ussd-user-input" autocomplete="off" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-hormuud-green font-mono text-slate-800" placeholder="Geli jawaabtaada...">
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-4 py-3 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeUSSD()" class="px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-200 transition">
+                    Kansal (Cancel)
+                </button>
+                <button onclick="submitUSSDResponse()" class="px-5 py-1.5 rounded-xl text-xs font-bold bg-hormuud-green hover:bg-emerald-700 text-white transition">
+                    Dir (Send)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+     <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 relative overflow-hidden">
+        
+        <!-- Header / Progress Bar -->
+        <div id="quiz-header">
+            <div class="flex justify-between items-center mb-3">
+                <span id="question-tracker" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                    Su'aasha 1 ee 10
+                </span>
+                <span id="score-live" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">
+                    Puntos: 0
+                </span>
+            </div>
+            <!-- Progress bar container -->
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-6">
+                <div id="progress-bar" class="bg-indigo-600 h-full w-1/10 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Qeybta Su'aasha iyo Jawaabaha -->
+        <div id="quiz-body">
+            <!-- Su'aasha -->
+            <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 mb-6 leading-snug">
+                Su'aashu halkan ayay soo bixi doontaa...
+            </h2>
+
+            <!-- Liiska Jawaabaha -->
+            <div id="answers-container" class="space-y-3 mb-6">
+                <!-- Jawaabaha ayaa JavaScript looga soo shubayaa halkan -->
+            </div>
+
+            <!-- Batan-ka Su'aasha Xigta -->
+            <button id="next-btn" onclick="nextQuestion()" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
+                <span>Tallaabada Xigta</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Qeybta Natiijada Ugu Dambaysa (Hidden By Default) -->
+        <div id="result-screen" class="hidden text-center py-6 space-y-5">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Hambalyo! Waad Dhameysay</h2>
+                <p class="text-sm text-slate-500 mt-1">Halkan waa natiijadii aad ka keentay quiz-ka:</p>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-around items-center">
+                <div>
+                    <span class="block text-2xl font-black text-indigo-600" id="final-score">0/10</span>
+                    <span class="text-xs text-slate-400 font-medium">Jawaabaha Saxda ah</span>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div>
+                    <span class="block text-2xl font- text-emerald-500" id="final-percentage">0%</span>
+                    <span class="text-xs text-slate-400 font-medium">Boqolkiiba</span>
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg">
+                <i class="fa-solid fa-rotate-right text-sm"></i>
+                <span>Dib u bilaaw Quiz-ka</span>
+            </button>
+        </div>
+
+    </div>
+
+     <div class="container">
+        <!-- Circular Timer -->
+        <div class="circle-container">
+            <svg class="circle-svg" viewBox="0 0 280 280">
+                <circle class="circle-bg" cx="140" cy="140" r="130"></circle>
+                <circle id="progress" class="circle-progress" cx="140" cy="140" r="130"></circle>
+            </svg>
+            <div class="timer-display">
+                <div id="time-display" class="time-text color-white pt-10">25:00</div>
+                <div id="mode-display" class="mode-text color white ">Focus</div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="controls">
+            <button id="start-btn" onclick="toggleTimer()" class="btn btn-primary">
+                <i id="start-icon" class="fa-solid fa-play"></i>
+                <span id="start-text">Bilow</span>
+            </button>
+            <button onclick="resetTimer()" class="btn btn-secondary">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Dib u bilow</span>
+            </button>
+            <button onclick="skipMode()" class="btn btn-secondary">
+                <i class="fa-solid fa-forward-step"></i>
+                <span>Ka gudub</span>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- JavaScript Logic -->
+    <!-- <script>
+        // User Account Data
+        let accountState = {
+            pin: "1234",
+            balance: 154.50
+        };
+
+        // Current Step Tracker
+        let flowState = { 
+            activeStep: null, 
+            tempData: {} 
+        };
+
+        const codeInput = document.getElementById('ussd-code-input');
+
+        function quickType(code) {
+            codeInput.value = code;
+        }
+
+        function updateBalanceDisplay() {
+            document.getElementById('info-balance-display').innerText = `$${accountState.balance.toFixed(2)}`;
+        }
+
+        // Show USSD Modal Overlay
+        function showUSSDModal(title, message, inputNeeded = true, inputType = "text", placeholder = "") {
+            document.getElementById('ussd-header-title').innerText = title;
+            document.getElementById('ussd-prompt-text').innerText = message;
+            const inputContainer = document.getElementById('ussd-input-container');
+            const userInput = document.getElementById('ussd-user-input');
+            
+            userInput.value = "";
+            userInput.type = inputType;
+            userInput.placeholder = placeholder;
+
+            if (inputNeeded) {
+                inputContainer.classList.remove('hidden');
+                setTimeout(() => userInput.focus(), 100);
+            } else {
+                inputContainer.classList.add('hidden');
+            }
+
+            document.getElementById('ussd-overlay').classList.remove('hidden');
+        }
+
+        function closeUSSD() {
+            document.getElementById('ussd-overlay').classList.add('hidden');
+            flowState = { activeStep: null, tempData: {} };
+        }
+
+        // Keypress Listener (Enter to Submit)
+        window.addEventListener('keydown', (e) => {
+            const overlayVisible = !document.getElementById('ussd-overlay').classList.contains('hidden');
+            if (overlayVisible && e.key === 'Enter') {
+                e.preventDefault();
+                submitUSSDResponse();
+            } else if (!overlayVisible && e.key === 'Enter') {
+                executeUSSD();
+            }
+        });
+
+        // Start USSD Call
+        function executeUSSD() {
+            const code = codeInput.value.trim();
+            if (!code) return;
+
+            if (code === "*711#") {
+                flowState.activeStep = "711_PIN";
+                showUSSDModal("EVC Plus - Haraaga", "Fadlan geli PIN-kaaga (4 number):", true, "password", "xxxx");
+            } else if (code === "*770#") {
+                flowState.activeStep = "770_PIN";
+                showUSSDModal("EVC Plus - Main Menu", "EVCPlus\nFadlan geli PIN-kaaga:", true, "password", "xxxx");
+            } else {
+                showUSSDModal("USSD Error", `Koodhka (${code}) ma aha mid sax ah.\nIsku day *711# ama *770#.`, false);
+            }
+        }
+
+        // Handle Step-by-Step EVC Plus Flow
+        function submitUSSDResponse() {
+            const input = document.getElementById('ussd-user-input').value.trim();
+
+            switch (flowState.activeStep) {
+                
+                // STEP 1: *711# PIN Check
+                case "711_PIN":
+                    if (input === accountState.pin) {
+                        showUSSDModal("EVC Plus", `[-EVCPlus-]\nHaraagagaagu waa: $${accountState.balance.toFixed(2)}.\nMahadsanid.`, false);
+                        flowState.activeStep = null;
+                    } else {
+                        showUSSDModal("EVC Plus", "PIN-ka aad gelisay waa qaldan yahay.", false);
+                    }
+                    break;
+
+                // STEP 2: *770# PIN Check
+                case "770_PIN":
+                    if (input === accountState.pin) {
+                        flowState.activeStep = "770_MENU";
+                        showUSSDModal("EVC Plus", "EVCPlus\n1. Haraaga\n2. Kaarka Hadalka\n3. Bixi Biil\n4. U dir lacag\n5. Warbixin Kooban\n6. Maaraynta", true, "text", "Geli nambarka (1-6)");
+                    } else {
+                        showUSSDModal("EVC Plus", "PIN-ka aad gelisay waa qaldan yahay.", false);
+                    }
+                    break;
+
+                // Menu Selection
+                case "770_MENU":
+                    if (input === "1") {
+                        showUSSDModal("EVC Plus", `[-EVCPlus-]\nHaraagagaagu waa: $${accountState.balance.toFixed(2)}.`, false);
+                    } else if (input === "4") {
+                        flowState.activeStep = "SEND_MONEY_NUM";
+                        showUSSDModal("EVC Plus - U Dir Lacag", "Fadlan geli mobile-ka:", true, "tel", "61xxxxxxx");
+                    } else {
+                        showUSSDModal("EVC Plus", "Doorashadan dhowaan ayaa la soo kordhin doonaa.", false);
+                    }
+                    break;
+
+                // Send Money - Phone Number
+                case "SEND_MONEY_NUM":
+                    if (input.length >= 7 && !isNaN(input)) {
+                        flowState.tempData.recipient = input;
+                        flowState.activeStep = "SEND_MONEY_AMT";
+                        showUSSDModal("EVC Plus - U Dir Lacag", "Fadlan geli lacagta ($):", true, "number", "0.00");
+                    } else {
+                        showUSSDModal("EVC Plus", "Lambar qaldan! Fadlan geli lambarka moobaylka ee saxda ah.", false);
+                    }
+                    break;
+
+                // Send Money - Amount
+                case "SEND_MONEY_AMT":
+                    const amt = parseFloat(input);
+                    if (!isNaN(amt) && amt > 0) {
+                        if (amt <= accountState.balance) {
+                            flowState.tempData.amount = amt;
+                            flowState.activeStep = "SEND_MONEY_CONFIRM";
+                            showUSSDModal("EVC Plus - Xaqiijin", `Ma deeqdaa inaad $${amt.toFixed(2)} u dirtid ${flowState.tempData.recipient}?\n1. Haa\n2. Maya`, true, "number", "1 ama 2");
+                        } else {
+                            showUSSDModal("EVC Plus", `Haraagaga kuguma filna!\nHaraagaaga waa: $${accountState.balance.toFixed(2)}`, false);
+                        }
+                    } else {
+                        showUSSDModal("EVC Plus", "Fadlan geli qadar lacageed oo sax ah.", false);
+                    }
+                    break;
+                // Send Money - Confirmation
+                case "SEND_MONEY_CONFIRM":
+                    if (input === "1") {
+                        accountState.balance -= flowState.tempData.amount;
+                        updateBalanceDisplay();
+                        showUSSDModal("EVC Plus", `[-EVCPlus-]\n$${flowState.tempData.amount.toFixed(2)} ayaad u dirtay ${flowState.tempData.recipient}.\nHaraagaaga cusub waa: $${accountState.balance.toFixed(2)}.`, false);
+                    } else {
+                        closeUSSD();
+                    }
+                    break;
+
+                default:
+                    closeUSSD();
+                    break;
+            }
+        }
+    </script> -->
+
+
+
+<script src="java.js"></script>
+
+</body>
+</html>
