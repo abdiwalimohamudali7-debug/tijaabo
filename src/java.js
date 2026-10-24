@@ -390,7 +390,7 @@
         // State Variables
         let isRunning = false;
         let isFocusMode = true;
-        let timer = null;
+        let time = null;
         let focusSeconds = 0.5 * 60; // 25 daqiiqad
         let breakSeconds = 5 * 60;  // 5 daqiiqad nasasho ah
         let totalSeconds = focusSeconds;
@@ -521,3 +521,76 @@
 
         // Initial render
         render();
+
+
+
+
+
+
+
+
+
+
+
+        let pwdLength = 14;
+        const passwordInput = document.getElementById('password-field');
+        const lengthVal = document.getElementById('length-val');
+        const messageBox = document.getElementById('message-box');
+
+        // Shaqada lagu abuurayo Password adag
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=";
+            const array = new Uint32Array(pwdLength);
+            window.crypto.getRandomValues(array);
+
+            let result = "";
+            for (let i = 0; i < pwdLength; i++) {
+                result += chars[array[i] % chars.length];
+            }
+
+            passwordInput.value = result;
+        }
+
+        // Isbeddelka dhererka furaha
+        function updateLength(val) {
+            pwdLength = parseInt(val);
+            lengthVal.innerText = pwdLength;
+            generatePassword();
+        }
+
+        // Shaqada Nuukso (Copy)
+        function copyPassword() {
+            if (!passwordInput.value) return;
+
+            // Isticmaal textarea Ktemporary ah si uu si ammaan ah ugu shaqeeyo iFrame-yada
+            const tempArea = document.createElement('textarea');
+            tempArea.value = passwordInput.value;
+            tempArea.style.position = 'fixed';
+            tempArea.style.opacity = '0';
+            document.body.appendChild(tempArea);
+            tempArea.select();
+
+            try {
+                document.execCommand('copy');
+                showMessage();
+            } catch (err) {
+                console.error("Nuuksashadu ma suurtogalin", err);
+            } finally {
+                document.body.removeChild(tempArea);
+            }
+        }
+
+        // Muujinta Fariinta Nuuksashada
+        let timer;
+        function showMessage() {
+            messageBox.classList.remove('hidden');
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Marka bogga la furo markiiba abuur password
+        window.onload = function() {
+            generatePassword();
+        };
